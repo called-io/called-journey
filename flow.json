@@ -1,0 +1,281 @@
+{
+  "$comment": "Called-deeweb app flow map. Auto-readable: screens[] are nodes, edges[] are transitions. Use this to understand UX flow and feed it to AI for UX-improvement suggestions.",
+  "generated_at": "2026-05-13",
+  "app": "called-chat (web app at apps/called-chat)",
+  "stack": "React + Wouter routing + SCSS modules + Zustand + React Query + MUI (selectively)",
+  "captured_under_account": "Jason Brown (jbrown@newmanministry.com) — admin of multiple test communities",
+  "viewport": { "width": 1440, "height": 900 },
+  "phases": [
+    { "id": 1, "name": "Auth & onboarding" },
+    { "id": 2, "name": "Shell & navigation" },
+    { "id": 3, "name": "Community lifecycle" },
+    { "id": 4, "name": "Chat channels" },
+    { "id": 5, "name": "Groups" },
+    { "id": 6, "name": "Events, News & feature CRUD" },
+    { "id": 7, "name": "Modals & overlays (captured across phases 3-5)" }
+  ],
+  "screens": [
+    { "id": "signin", "phase": 1, "title": "Sign in", "url": "/", "auth": "public", "screenshot": "p1_01_signin.png", "description": "Auth landing page. Toggle pill switches Login (default) vs Sign Up. Three OAuth/email entry points.", "actions": [
+      { "label": "Sign Up tab", "to": "signup" },
+      { "label": "Login tab (default)", "to": "signin" },
+      { "label": "Continue with Google", "to": "external:google_oauth" },
+      { "label": "Continue with Apple", "to": "external:apple_oauth" },
+      { "label": "Continue with Email", "to": "signin_email_form" }
+    ]},
+    { "id": "signup", "phase": 1, "title": "Sign Up landing", "url": "/", "auth": "public", "screenshot": "p1_02_signup.png", "description": "Same shell as signin but heading 'Start Your Free Trial — Create your community account'.", "actions": [
+      { "label": "Login tab", "to": "signin" },
+      { "label": "Continue with Email", "to": "signup_email_form" }
+    ]},
+    { "id": "signup_email_form", "phase": 1, "title": "Sign Up email form", "url": "/", "auth": "public", "screenshot": "p1_03_signup_email_form.png", "description": "2-field signup: name and email. Then 'Join Called' button. Implicit later: confirm email step.", "actions": [
+      { "label": "Join Called", "to": "post_signup_email_confirm" }
+    ]},
+    { "id": "signin_email_form", "phase": 1, "title": "Login email form", "url": "/", "auth": "public", "screenshot": "p1_04_login_email_form.png", "description": "Email + password. Has Forgot password link and Use Phone Number Instead link.", "actions": [
+      { "label": "Forgot password?", "to": "reset_password" },
+      { "label": "Use Phone Number Instead", "to": "phone_auth_form" },
+      { "label": "Log In", "to": "home" }
+    ]},
+    { "id": "reset_password", "phase": 1, "title": "Reset password", "url": "/reset-password", "auth": "public", "screenshot": "p1_05_reset_password.png", "description": "Single email field; sends reset link.", "actions": [
+      { "label": "Send password reset email", "to": "external:email_inbox" },
+      { "label": "Back to login", "to": "signin" }
+    ]},
+    { "id": "logout_confirm", "phase": 1, "title": "Log Out confirmation modal", "url": "/profile/edit (overlay)", "auth": "authed", "screenshot": "p1_00_logout_confirm.png", "description": "Bottom-anchored confirmation in settings panel: 'Are you sure you want to log out?' with Cancel / Log Out.", "actions": [
+      { "label": "Cancel", "to": "edit_profile" },
+      { "label": "Log Out", "to": "signin" }
+    ]},
+
+    { "id": "home", "phase": 2, "title": "Home dashboard", "url": "/", "auth": "authed", "screenshot": "p2_01_home_dashboard.png", "description": "Personal dashboard: greeting + 4 cards (Your Events, Your Communities, Prayer Requests, Your Groups). Has top-bar attention banner if communities need action.", "actions": [
+      { "label": "Left nav: Home/Chat/Groups/Members/Insights/Pathway/Events/News", "to": "various" },
+      { "label": "Top: 'Manage your communities' banner button", "to": "settings_manage_communities" },
+      { "label": "Top: What's New badge", "to": "whats_new_panel" },
+      { "label": "Top: notifications bell", "to": "notifications_panel" },
+      { "label": "Profile menu (avatar bottom-left)", "to": "profile_menu" },
+      { "label": "Click community card", "to": "community_detail" },
+      { "label": "Click group card", "to": "community_detail (group variant)" },
+      { "label": "Explore Events button (empty events)", "to": "events_list" },
+      { "label": "Create prayer request", "to": "modal:create_prayer" },
+      { "label": "Show all communities link", "to": "groups_list" }
+    ]},
+    { "id": "chat", "phase": 2, "title": "Chat view", "url": "/chat/:entityId", "auth": "authed", "screenshot": "p2_02_chat.png", "description": "Two-pane chat. Left: search, filter tabs (All/DMs/Groups/Unread), Pinned + All Chats list. Right: selected chat with Happening Now carousel above, messages, input with GIF/attachment/Bible/event/prayer/AI tools.", "actions": [
+      { "label": "Search chats", "to": "(filters in place)" },
+      { "label": "Create new chat (top right)", "to": "modal:new_message" },
+      { "label": "Click any chat in list", "to": "chat (same view, selected channel)" },
+      { "label": "Filter tabs (All/DMs/Groups/Unread)", "to": "(filters in place)" },
+      { "label": "Click event in Happening Now", "to": "event_detail" },
+      { "label": "+ in Happening Now bar (create feed item)", "to": "modal:create_event_or_message" },
+      { "label": "QR icon in channel header", "to": "modal:channel_qr" },
+      { "label": "Options ⋮ in channel header", "to": "channel_options_menu" },
+      { "label": "Hover message → reply/options/react", "to": "(inline)" }
+    ]},
+    { "id": "groups_list", "phase": 2, "title": "Groups list", "url": "/groups", "auth": "authed", "screenshot": "p2_03_groups.png", "description": "Grid of group cards. Sections: 'Your groups' (you're a member) and (below) 'Other groups in your communities'. Each card shows group avatar, parent community, member count, role (Admin/Member).", "actions": [
+      { "label": "Search groups", "to": "(filters in place)" },
+      { "label": "+ Create group", "to": "modal:create_group" },
+      { "label": "Click group card", "to": "community_detail (group variant)" }
+    ]},
+    { "id": "members", "phase": 2, "title": "Members (Manage)", "url": "/manage/:entityId", "auth": "authed", "screenshot": "p2_04_members.png", "description": "Tabular member roster for the active community. Columns: Member, Tags, Shepherd, Role, Date Joined, Last Active. Tabs: Members / Incoming Students / Former Members. Has search + pagination + bulk add/export/tag buttons.", "actions": [
+      { "label": "Community switcher (top-left)", "to": "members (different entity)" },
+      { "label": "Tabs Incoming Students / Former Members", "to": "(filters in place)" },
+      { "label": "Search", "to": "(filters in place)" },
+      { "label": "+ icon (top right)", "to": "modal:add_member" },
+      { "label": "Upload icon", "to": "modal:bulk_import_members" },
+      { "label": "Tag icon", "to": "modal:tag_management" }
+    ]},
+    { "id": "insights", "phase": 2, "title": "Insights", "url": "/insights/:entityId", "auth": "authed", "screenshot": "p2_05_insights.png", "description": "Analytics dashboard with 4 KPI cards: Members in your care, Members in a group, Members at risk, Event Attendance. Time range toggle (7d / 30d / 90d).", "actions": [
+      { "label": "Community switcher", "to": "insights (different entity)" },
+      { "label": "Time range 7d/30d/90d", "to": "(filters in place)" },
+      { "label": "Expand each KPI card (chevron)", "to": "(inline drill-down)" }
+    ]},
+    { "id": "pathway", "phase": 2, "title": "Pathways list", "url": "/pathway", "auth": "authed", "screenshot": "p2_06_pathway.png", "description": "Grid of pathway cards across all communities. Each card has the pathway name (e.g., 'Onboarding', 'Faith Forward') + parent community. Avatars show enrolled members where applicable.", "actions": [
+      { "label": "Click pathway card", "to": "pathway_detail" }
+    ]},
+    { "id": "events_list", "phase": 2, "title": "Events", "url": "/events/all", "auth": "authed", "screenshot": "p2_07_events.png", "description": "Combined week-calendar grid + 'Upcoming Events' list below. Has community filter ('All Events'), week navigation, This Week shortcut, layout toggle (calendar / list / etc.).", "actions": [
+      { "label": "Create Event", "to": "create_event_form" },
+      { "label": "Week nav arrows", "to": "(filters in place)" },
+      { "label": "All Events filter dropdown", "to": "(filters in place)" },
+      { "label": "Click event in calendar/list", "to": "event_detail" },
+      { "label": "RSVP button on event card", "to": "(inline action)" }
+    ]},
+    { "id": "news_list", "phase": 2, "title": "News", "url": "/news/all", "auth": "authed", "screenshot": "p2_08_news.png", "description": "Vertical list of news posts. Each has cover image, title, author + community + date, body excerpt, Read More, heart/like, copy link, and ⋯ menu.", "actions": [
+      { "label": "Create News Post", "to": "create_news_form" },
+      { "label": "All News filter dropdown", "to": "(filters in place)" },
+      { "label": "Click news title or Read More", "to": "news_detail" }
+    ]},
+    { "id": "profile_menu", "phase": 2, "title": "Profile menu popover", "url": "(overlay)", "auth": "authed", "screenshot": "p2_09_profile_menu.png", "description": "Popover anchored to avatar at bottom-left. Top: Set Status (current emoji + text, Clear/Save). Then: Communities, Settings.", "actions": [
+      { "label": "Set Status (Save / Clear)", "to": "(inline)" },
+      { "label": "Communities", "to": "groups_list (Your communities tab)" },
+      { "label": "Settings", "to": "edit_profile" }
+    ]},
+    { "id": "edit_profile", "phase": 2, "title": "Edit Profile / Settings", "url": "/profile/edit", "auth": "authed", "screenshot": "p2_10_settings_edit_profile.png", "description": "Two-pane Settings page. Left sidebar: Edit Profile, Manage communities, Blocked users, Give feedback (ext), Support (ext), About called (ext), Privacy policy (ext), Terms of service (ext), Release notes (ext), Get the app (ext). Log out at bottom. Right pane: name, avatar, theme toggle, notification sound, contact + account emails.", "actions": [
+      { "label": "Manage communities", "to": "settings_manage_communities" },
+      { "label": "Blocked users", "to": "settings_blocked_users" },
+      { "label": "Give feedback (external)", "to": "external:noteforms" },
+      { "label": "Support (external)", "to": "external:support.called.app" },
+      { "label": "About called (external)", "to": "external:called.app" },
+      { "label": "Privacy policy (external)", "to": "external:called.app/privacy" },
+      { "label": "Terms of service (external)", "to": "external:called.app/terms" },
+      { "label": "Release notes (external)", "to": "external:headway" },
+      { "label": "Get the app (external)", "to": "external:play_store" },
+      { "label": "Log out", "to": "logout_confirm" },
+      { "label": "Theme toggle (sun icon)", "to": "(inline — dark/light)" },
+      { "label": "Notification sound pill (Ding Soft)", "to": "modal:notification_sound_picker" },
+      { "label": "Pencil (edit profile fields)", "to": "modal:edit_profile_fields" }
+    ]},
+    { "id": "settings_manage_communities", "phase": 2, "title": "Manage communities", "url": "/profile/plan-billing", "auth": "authed", "screenshot": "p2_11_settings_manage_communities.png", "description": "Each owned community as a card with: avatar, name, plan info, status (e.g., Paused), View community, Activate subscription, Manage this community. Banner button 'Manage your communities' in top nav routes here.", "actions": [
+      { "label": "+ Create Community", "to": "create_community_step1" },
+      { "label": "View community", "to": "community_detail" },
+      { "label": "Manage this community (pencil)", "to": "edit_community" },
+      { "label": "Activate subscription", "to": "modal:upgrade_plan" },
+      { "label": "Click community name link", "to": "community_detail" }
+    ]},
+    { "id": "settings_blocked_users", "phase": 2, "title": "Blocked users", "url": "/profile/blockedusers", "auth": "authed", "screenshot": "p2_12_settings_blocked_users.png", "description": "List of accounts the user has blocked. Empty state: 'No blocked accounts'.", "actions": [
+      { "label": "Unblock action per row", "to": "(inline)" }
+    ]},
+    { "id": "settings_notifications", "phase": 2, "title": "Notifications settings", "url": "/profile/notifications", "auth": "authed", "screenshot": "p2_13_settings_notifications.png", "description": "Push notification preferences with three toggles: New Events, New Members, Join Requests. NOTE: not linked from Settings sidebar — only reachable via direct URL or notification-sound button on Edit Profile.", "warnings": ["Orphaned route — no UI link from settings nav. Likely a discoverability bug."], "actions": [
+      { "label": "Toggle each preference", "to": "(inline)" }
+    ]},
+    { "id": "notifications_panel", "phase": 2, "title": "Notifications dropdown", "url": "(overlay)", "auth": "authed", "screenshot": "p2_14_notifications_panel.png", "description": "Anchored to the bell in top bar. List of notifications (New Member Joined, New Member Request, etc.) with timestamp and 'Mark all as read' link.", "actions": [
+      { "label": "Click notification row", "to": "(navigates to relevant entity)" },
+      { "label": "Mark all as read", "to": "(inline)" }
+    ]},
+    { "id": "whats_new_panel", "phase": 2, "title": "What's New panel", "url": "(overlay)", "auth": "authed", "screenshot": "p2_15_whats_new_panel.png", "description": "Headway-rendered changelog widget. Loaded from headwayapp.co — slow to render and intercepts clicks if not dismissed.", "warnings": ["Third-party iframe intercepts pointer events on adjacent UI when visible. Use Escape or close X to dismiss before interacting with page beneath."], "actions": [
+      { "label": "Click changelog item", "to": "external:headway_post" },
+      { "label": "Close X", "to": "(closes panel)" }
+    ]},
+    { "id": "community_detail", "phase": 2, "title": "Community / Group detail", "url": "/groups/:id", "auth": "authed", "screenshot": "p2_16_community_detail.png", "description": "Hero banner with avatar, name, type (Community / Group), member count. Action bar top-right: Go to community chat, Show QR code, Copy invite link, Edit Community (or Edit Group). Body: About, group count, RSS URL (community only), Upcoming Events. Right rail: Community/Group Leader card with Message Leader, Members card with Add members.", "actions": [
+      { "label": "Go to community chat", "to": "chat" },
+      { "label": "Show QR code", "to": "modal:qr_code" },
+      { "label": "Copy invite link", "to": "(clipboard)" },
+      { "label": "Edit Community / Edit Group", "to": "edit_community" },
+      { "label": "Message Leader", "to": "chat (DM with leader)" },
+      { "label": "+ Add members", "to": "modal:add_members" },
+      { "label": "RSVP on event row", "to": "(inline)" },
+      { "label": "Enable RSS Feed link", "to": "edit_community (RSS section)" }
+    ]},
+
+    { "id": "create_community_step1", "phase": 3, "title": "Create Community — Step 1 (Role)", "url": "/profile/plan-billing (overlay)", "auth": "authed", "screenshot": "p3_01_create_community_step1.png", "description": "Modal step 1 of 2: 'What best describes your role?' 4 options: Church Leader, Campus Minister, Group Leader, Other. Next button disabled until selection.", "actions": [
+      { "label": "Select a role + Next", "to": "create_community_step2" },
+      { "label": "Close X", "to": "settings_manage_communities" }
+    ]},
+    { "id": "create_community_step2", "phase": 3, "title": "Create Community — Step 2 (Details)", "url": "/profile/plan-billing (overlay)", "auth": "authed", "screenshot": "p3_02_create_community_step2.png", "description": "Modal step 2: Community Name*, Website, Address, Church Affiliation* dropdown (Catholic/Protestant/Orthodox/Non-Denominational), Community size slider (5 buckets). Finish disabled until required fields filled.", "actions": [
+      { "label": "Go back", "to": "create_community_step1" },
+      { "label": "Finish", "to": "post_create_community" }
+    ]},
+    { "id": "post_create_community", "phase": 3, "title": "Post-create — auto-redirect to /dashboard/", "url": "/dashboard/", "auth": "authed", "screenshot": "p3_04_create_community_finished.png", "description": "On success, user lands on /dashboard/ (note trailing slash variant). Newly created community auto-generates a 'Women's Group' default group, an upcoming 'Bible Study' event template, and is added to user's communities list.", "warnings": ["Auto-creation of Women's Group and Bible Study event on every new community can surprise users."], "actions": [
+      { "label": "(implicit) View new community via Manage communities", "to": "community_detail" }
+    ]},
+    { "id": "qr_modal", "phase": 3, "title": "QR code modal", "url": "(overlay on community/group detail)", "auth": "authed", "screenshot": "p3_06_qr_code_modal.png", "description": "Centered modal with community name, QR code image, Download button, Print link.", "actions": [
+      { "label": "Download", "to": "(file download)" },
+      { "label": "Print", "to": "(print dialog)" },
+      { "label": "Close X", "to": "community_detail" }
+    ]},
+    { "id": "edit_community", "phase": 3, "title": "Edit Community / Edit Group", "url": "/groups/:id (overlay/page)", "auth": "authed", "screenshot": "p3_07b_edit_community_full.png", "description": "Long settings page with many sections: Cover Image upload, Avatar, Name, Description (Quill editor with bold/italic/underline/list/link/AI Cleanup), Address combobox, Phone, Email, Website, Facebook, Instagram URLs, Welcome Message (Message From combobox + text), Default Groups (checkboxes - auto-add new members), Community Visibility (Public/Private), Membership Approval Required (No/Yes), Community Chat (All members / Only leaders can send), Enable RSS Feed (Disable/Enable), and Delete Community/Delete Group at the bottom.", "actions": [
+      { "label": "Save Changes", "to": "community_detail" },
+      { "label": "Cancel", "to": "community_detail" },
+      { "label": "Delete Community", "to": "delete_community_confirm" }
+    ]},
+    { "id": "delete_community_confirm", "phase": 3, "title": "Delete community confirm", "url": "(overlay)", "auth": "authed", "screenshot": "p3_08_delete_community_confirm.png", "description": "Centered modal. Shows community avatar + name + member count. Requires user to type community name exactly to enable destructive Delete button. Warning: 'This action cannot be undone.'", "actions": [
+      { "label": "Type name + Delete community", "to": "groups_list" },
+      { "label": "Cancel", "to": "edit_community" }
+    ]},
+
+    { "id": "new_message_modal", "phase": 4, "title": "New Message — choose type", "url": "/chat/:entityId (overlay)", "auth": "authed", "screenshot": "p4_01_create_chat_menu.png", "description": "Modal with 3 options: Message (private DM with selected people), Channel (topic-specific, leader-managed), Find a Channel (browse and join public channels).", "actions": [
+      { "label": "Message", "to": "modal:new_dm" },
+      { "label": "Channel", "to": "create_channel_step1" },
+      { "label": "Find a Channel", "to": "modal:find_channel" },
+      { "label": "Close X", "to": "chat" }
+    ]},
+    { "id": "create_channel_step1", "phase": 4, "title": "Create Channel — Step 1 (Pick community/group)", "url": "(overlay)", "auth": "authed", "screenshot": "p4_02_create_channel_form.png", "description": "List of communities + groups user belongs to. Each row shows avatar, name, member count, role. Search box at top.", "actions": [
+      { "label": "Select parent + Continue", "to": "create_channel_step2" },
+      { "label": "Cancel", "to": "chat" }
+    ]},
+    { "id": "create_channel_step2", "phase": 4, "title": "Create Channel — Step 2 (Name + privacy)", "url": "(overlay)", "auth": "authed", "screenshot": "p4_03_create_channel_step2.png", "description": "Tabs: Public / Private. Channel-name input. Member search (only relevant for Private). Create button.", "actions": [
+      { "label": "Back", "to": "create_channel_step1" },
+      { "label": "Create", "to": "new_channel_view" }
+    ]},
+    { "id": "new_channel_view", "phase": 4, "title": "New channel — first view", "url": "/chat/:channelUrl", "auth": "authed", "screenshot": "p4_04_channel_created.png", "description": "Newly created channel selected. Shows 'Jason joined.' system message. Empty message body. Message input ready.", "actions": [
+      { "label": "Type and send message", "to": "(inline)" }
+    ]},
+    { "id": "message_sent", "phase": 4, "title": "Channel with message sent", "url": "/chat/:channelUrl", "auth": "authed", "screenshot": "p4_05_message_sent.png", "description": "Sent message appears with author avatar, name, body, timestamp. Hover shows action buttons.", "actions": [
+      { "label": "Hover message", "to": "message_hover_state" }
+    ]},
+    { "id": "message_hover_state", "phase": 4, "title": "Message hover actions", "url": "(inline on message)", "auth": "authed", "screenshot": "p4_06_message_hover_actions.png", "description": "On hover, 4 action affordances appear at top-right of message: Reply, Options (⋯), +, emoji 😀 (Add Reaction).", "actions": [
+      { "label": "Reply to message", "to": "modal:reply" },
+      { "label": "Options ⋯", "to": "message_options_menu" },
+      { "label": "Add Reaction", "to": "modal:emoji_picker" }
+    ]},
+    { "id": "message_options_menu", "phase": 4, "title": "Message options menu", "url": "(overlay)", "auth": "authed", "screenshot": "p4_07_message_options_menu.png", "description": "Popover: Copy Message, Copy Message Link, Convert to Prayer, Edit Message, Delete Message (destructive red).", "actions": [
+      { "label": "Copy Message", "to": "(clipboard)" },
+      { "label": "Copy Message Link", "to": "(clipboard)" },
+      { "label": "Convert to Prayer", "to": "modal:convert_to_prayer" },
+      { "label": "Edit Message", "to": "(inline edit)" },
+      { "label": "Delete Message", "to": "modal:delete_message_confirm" }
+    ]},
+    { "id": "channel_options_menu", "phase": 4, "title": "Channel header options menu", "url": "(overlay)", "auth": "authed", "screenshot": "p4_08_channel_header_menu.png", "description": "Popover from channel header ⋯: Manage Members, Add Members, Invite Members, Pin Channel, Mute Channel, Delete Channel (red), Leave Channel (red).", "actions": [
+      { "label": "Manage Members", "to": "modal:manage_members" },
+      { "label": "Add Members", "to": "modal:add_members_to_channel" },
+      { "label": "Invite Members", "to": "modal:invite_link_channel" },
+      { "label": "Pin Channel", "to": "(inline)" },
+      { "label": "Mute Channel", "to": "(inline)" },
+      { "label": "Delete Channel", "to": "delete_channel_confirm" },
+      { "label": "Leave Channel", "to": "modal:leave_channel_confirm" }
+    ]},
+    { "id": "delete_channel_confirm", "phase": 4, "title": "Delete channel confirm", "url": "(overlay)", "auth": "authed", "screenshot": "p4_09_delete_channel_confirm.png", "description": "Simple confirm: 'Are you sure you want to delete this channel? This action cannot be undone.' Cancel / Delete (red). NOTE: unlike community delete, does NOT require typing name.", "warnings": ["Channel deletion is one-click after confirm — no name confirmation despite being destructive."], "actions": [
+      { "label": "Delete", "to": "chat (channel removed)" },
+      { "label": "Cancel", "to": "chat (back to channel)" }
+    ]},
+
+    { "id": "create_group_modal", "phase": 5, "title": "Create group", "url": "/groups (overlay)", "auth": "authed", "screenshot": "p5_01_create_group_modal.png", "description": "Single-step modal. Fields: Group image, Group name, Parent community combobox (REQUIRED), Description rich text, Assign group leader (Leader name + email, can add multiple), Group Visibility (Public/Private), Membership Approval Required (No/Yes).", "actions": [
+      { "label": "Create group", "to": "groups_list (new group on top)" },
+      { "label": "Cancel", "to": "groups_list" }
+    ]},
+    { "id": "group_detail", "phase": 5, "title": "Group detail", "url": "/groups/:groupId", "auth": "authed", "screenshot": "p5_04_group_detail.png", "description": "Same layout as community_detail. Differs: hero says 'Group', shows 'Affiliation' card with parent community, action bar includes Edit Group (not Edit Community).", "actions": [
+      { "label": "(see community_detail actions)", "to": "community_detail" },
+      { "label": "Edit Group", "to": "edit_group" }
+    ]},
+    { "id": "edit_group", "phase": 5, "title": "Edit Group", "url": "/groups/:groupId (overlay/page)", "auth": "authed", "screenshot": "p5_05_edit_group.png", "description": "Same shape as Edit Community. Has Delete Group at bottom.", "actions": [
+      { "label": "Save Changes", "to": "group_detail" },
+      { "label": "Delete Group", "to": "delete_group_confirm" }
+    ]},
+    { "id": "delete_group_confirm", "phase": 5, "title": "Delete group confirm", "url": "(overlay)", "auth": "authed", "screenshot": "p5_06_delete_group_confirm.png", "description": "Mirrors delete_community_confirm. Requires typing group name to enable destructive Delete button.", "actions": [
+      { "label": "Type name + Delete group", "to": "groups_list" },
+      { "label": "Cancel", "to": "edit_group" }
+    ]},
+
+    { "id": "create_event_form", "phase": 6, "title": "Create Event", "url": "/events/all/new", "auth": "authed", "screenshot": "p6_01_create_event_form.png", "description": "Full-page form (not modal). Fields: Cover image, Event Name*, Event Date, Time, Recurrence (Does not repeat / daily / weekly / etc.), Location, Description rich text, Event Contact (defaults to current user), Host Group or Community combobox.", "actions": [
+      { "label": "Save event (implicit Save button further down)", "to": "events_list" }
+    ]},
+    { "id": "create_news_form", "phase": 6, "title": "Create News Post", "url": "/news/all/new", "auth": "authed", "screenshot": "p6_02_create_news_form.png", "description": "Full-page form. Fields: Cover image, Title*, Author (current user), Hosting Group combobox, Publish Date (datetime), External Link, Body rich text. Submit: Create News Post / Cancel.", "actions": [
+      { "label": "Create News Post", "to": "news_list" },
+      { "label": "Cancel", "to": "news_list" }
+    ]}
+  ],
+  "shell_chrome": {
+    "description": "Persistent shell present on every authenticated route",
+    "top_bar": {
+      "left": "Called logo (→ /)",
+      "center": "Attention banner: 'X or more of your communities needs attention' + 'Manage your communities' button (→ /profile/plan-billing). Only visible if there are attention items.",
+      "right": "What's New badge with count (→ Headway widget); separator; Notifications bell with unread count (→ notifications_panel)"
+    },
+    "left_nav": [
+      { "label": "Home", "to": "/" },
+      { "label": "Chat", "to": "/chat/:entityId" },
+      { "label": "Groups", "to": "/groups" },
+      { "label": "Members", "to": "/manage/:entityId" },
+      { "label": "Insights", "to": "/insights/:entityId" },
+      { "label": "Pathway", "to": "/pathway" },
+      { "label": "Events", "to": "/events/all" },
+      { "label": "News", "to": "/news/all" }
+    ],
+    "bottom_of_left_nav": "Profile menu trigger (avatar → profile_menu popover)"
+  },
+  "ux_observations": [
+    "Two destructive flows use different friction levels: community/group delete requires typing the name; channel/message delete is a single-click confirm. Consider standardizing.",
+    "/profile/notifications exists as a route but is not linked anywhere in the Settings sidebar — discoverability gap.",
+    "Creating a community auto-generates a 'Women's Group' default group and a 'Bible Study' upcoming event template. This is surprising and not disclosed in the creation wizard.",
+    "The Headway 'What's New' iframe intercepts pointer events on cards near the top-right of the page when visible — automation has to forcibly remove it, suggesting real users may also bump into hard-to-click affordances when the widget is open.",
+    "The 'Group' concept is overloaded: top-level entities can be called 'Group Testing' (which is actually a Community), and 'Groups' nav goes to a list of sub-groups. Naming creates confusion for admins.",
+    "Action buttons on community/group hero are rendered as role='button' divs (not <button>), which complicates accessibility — many assistive tools will not announce them correctly.",
+    "Back-button behavior is conventional (browser history). No custom 'back' is layered on top of any route observed. Closing modals via X returns to the underlying page silently.",
+    "Settings panel mixes external links (Privacy, Terms, About, Support, Get the app, Release notes, Give feedback) with in-app routes without visual distinction — users may not know which open new tabs.",
+    "Community plan info on Manage Communities page shows 'transitioning to new Called experience' notices for legacy plans — a flow that needs better self-serve copy if users land here without context."
+  ]
+}

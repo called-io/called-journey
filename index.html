@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Called — App Flow Map</title>
+<style>
+  :root {
+    --bg: #f6f5fb;
+    --surface: #ffffff;
+    --ink: #1d1b20;
+    --ink-2: #4b4757;
+    --muted: #7a7585;
+    --brand: #5c2eef;
+    --brand-2: #f1ecff;
+    --border: #e5e0ee;
+    --danger: #c0392b;
+    --shadow: 0 1px 2px rgba(20,15,40,.04), 0 6px 24px rgba(20,15,40,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; }
+
+  /* Layout */
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  aside.toc { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; padding: 24px 18px; border-right: 1px solid var(--border); background: var(--surface); }
+  aside.toc h1 { font-size: 16px; margin: 0 0 4px; }
+  aside.toc .meta { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  aside.toc nav a { display: block; padding: 6px 8px; border-radius: 6px; color: var(--ink-2); font-size: 13px; }
+  aside.toc nav a:hover { background: var(--brand-2); color: var(--ink); text-decoration: none; }
+  aside.toc nav a.active { background: var(--brand-2); color: var(--brand); font-weight: 600; }
+  aside.toc .download { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+
+  main { padding: 32px 40px 80px; max-width: 1280px; }
+  header.intro { margin-bottom: 32px; }
+  header.intro h1 { font-size: 32px; margin: 0 0 8px; letter-spacing: -0.5px; }
+  header.intro p { color: var(--ink-2); margin: 0 0 8px; max-width: 70ch; }
+  header.intro .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .pill { display: inline-block; padding: 4px 10px; background: var(--brand-2); color: var(--brand); font-size: 12px; border-radius: 999px; font-weight: 500; }
+
+  section.phase { margin-top: 56px; }
+  section.phase h2 { font-size: 22px; margin: 0 0 4px; }
+  section.phase .phase-meta { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+  .card .thumb { display: block; aspect-ratio: 16/10; background: var(--bg); overflow: hidden; cursor: zoom-in; border-bottom: 1px solid var(--border); }
+  .card .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .card .body { padding: 14px 16px 16px; }
+  .card .title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .card .title strong { font-size: 15px; }
+  .card .url { font-family: ui-monospace, "SFMono-Regular", monospace; font-size: 11px; color: var(--muted); background: var(--bg); padding: 2px 6px; border-radius: 4px; }
+  .card .auth { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+  .auth-public { background: #e8f0fe; color: #1565c0; }
+  .auth-authed { background: #e6f7ee; color: #1f7a47; }
+  .card .desc { font-size: 13px; color: var(--ink-2); margin: 6px 0 12px; }
+  .card details { font-size: 12px; }
+  .card details summary { cursor: pointer; color: var(--brand); font-weight: 500; padding: 6px 0; user-select: none; }
+  .card details ul { margin: 4px 0 0; padding-left: 18px; color: var(--ink-2); }
+  .card details li { margin: 3px 0; }
+  .card details li code { color: var(--ink); }
+  .warnings { margin-top: 8px; padding: 8px 10px; background: #fff7e6; border: 1px solid #ffd58b; border-radius: 8px; font-size: 12px; color: #8a5a00; }
+  .warnings strong { display: block; margin-bottom: 4px; color: #6b4400; }
+
+  /* Lightbox */
+  .lightbox { position: fixed; inset: 0; background: rgba(15,10,30,.92); display: none; align-items: center; justify-content: center; z-index: 100; cursor: zoom-out; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 96vw; max-height: 92vh; object-fit: contain; box-shadow: 0 30px 80px rgba(0,0,0,.5); border-radius: 6px; }
+  .lightbox .caption { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.85); font-size: 13px; padding: 6px 12px; background: rgba(0,0,0,.5); border-radius: 999px; }
+
+  /* Observations + shell sections */
+  section.callout { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; margin-top: 56px; box-shadow: var(--shadow); }
+  section.callout h2 { margin-top: 0; font-size: 20px; }
+  section.callout ul { padding-left: 20px; }
+  section.callout li { margin: 6px 0; color: var(--ink-2); }
+  section.callout li strong { color: var(--ink); }
+
+  details.full-data summary { font-weight: 600; cursor: pointer; padding: 12px 0; }
+  details.full-data pre { background: #1d1b20; color: #e9e6f3; padding: 18px; border-radius: 10px; overflow-x: auto; font-size: 12px; line-height: 1.45; max-height: 520px; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    aside.toc { position: relative; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    main { padding: 24px 18px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="toc">
+    <h1>Called · App Flow Map</h1>
+    <div class="meta">Captured 2026-05-13 · web@1440×900 · under Jason Brown's account</div>
+    <nav id="toc-nav"></nav>
+    <div class="download">
+      <a href="./tree.html">🌳 View flow as a tree</a> — visual journey graph with all clicks linked.<br><br>
+      <a href="./flow.json" download>Download flow.json</a> — machine-readable sidecar of the same data.
+    </div>
+  </aside>
+
+  <main>
+    <header class="intro">
+      <h1>Called — End-to-End App Flow Map</h1>
+      <p>A snapshot of every primary screen in the Called web app, captured by walking the product as a logged-in admin. Each card shows the screen, where it lives, and where its buttons take you. Use it for an executive walkthrough or feed <code>flow.json</code> to an LLM to surface UX issues.</p>
+      <div class="pills">
+        <span class="pill">53 screenshots</span>
+        <span class="pill">7 phases</span>
+        <span class="pill">React + Wouter</span>
+        <span class="pill">apps/called-chat</span>
+      </div>
+    </header>
+
+    <section class="callout" id="how-to-read">
+      <h2>How to read this</h2>
+      <ul>
+        <li><strong>Each phase</strong> covers one user surface (auth, shell, lifecycle of a community, etc.) and is independently navigable from the left.</li>
+        <li><strong>Each card</strong> is one screen state. <em>URL</em> is the route (Wouter); <em>auth</em> tags whether it's reachable signed-out. Click the screenshot to view full-size.</li>
+        <li><strong>Actions</strong> expands the list of clickable affordances on that screen and where each one takes you. Targets prefixed with <code>modal:</code> are overlays; <code>external:</code> are off-site links.</li>
+        <li><strong>Back-button</strong> is conventional browser history everywhere we tested — closing a modal returns to the underlying route, no custom back-stack layered on top.</li>
+        <li>For LLM consumption: the same content is in <a href="./flow.json"><code>flow.json</code></a>, plus the <code>ux_observations</code> array there summarizes friction points worth fixing.</li>
+      </ul>
+    </section>
+
+    <section class="callout" id="shell-overview">
+      <h2>Shell chrome (present on every authenticated route)</h2>
+      <ul>
+        <li><strong>Top bar — left:</strong> Called logo links to <code>/</code> (home dashboard).</li>
+        <li><strong>Top bar — center:</strong> Attention banner ("X or more of your communities needs attention") + "Manage your communities" button → <code>/profile/plan-billing</code>. Only shown when items need attention.</li>
+        <li><strong>Top bar — right:</strong> What's New badge (opens Headway widget) and Notifications bell (opens dropdown panel).</li>
+        <li><strong>Left nav (top to bottom):</strong> Home, Chat, Groups, Members (<code>/manage/:entityId</code>), Insights, Pathway, Events, News. Profile menu trigger sits at the bottom.</li>
+      </ul>
+    </section>
+
+    <div id="phases"></div>
+
+    <section class="callout" id="ux-observations">
+      <h2>UX observations (auto-summarised; verify before acting)</h2>
+      <ul id="ux-list"></ul>
+    </section>
+
+    <section class="callout">
+      <details class="full-data">
+        <summary>Show full <code>flow.json</code> data</summary>
+        <pre id="json-dump"></pre>
+      </details>
+    </section>
+  </main>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <img id="lightbox-img" alt="">
+  <div class="caption" id="lightbox-cap"></div>
+</div>
+
+<script src="./flow-inline.js"></script>
+<script>
+// Try fetch first (works when served via http); fall back to inlined data (works on file://).
+(async function () {
+  let data = null;
+  try {
+    const res = await fetch('./flow.json');
+    if (res.ok) data = await res.json();
+  } catch (e) { /* file:// scheme — fetch blocked */ }
+  if (!data) data = window.__FLOW_DATA__;
+  render(data);
+})();
+
+function render(data) {
+  const nav = document.getElementById('toc-nav');
+  const phases = document.getElementById('phases');
+  const uxList = document.getElementById('ux-list');
+
+  const phaseDef = data.phases;
+  const screensByPhase = new Map();
+  data.screens.forEach(s => {
+    if (!screensByPhase.has(s.phase)) screensByPhase.set(s.phase, []);
+    screensByPhase.get(s.phase).push(s);
+  });
+
+  // TOC
+  nav.innerHTML = '<a href="#how-to-read">How to read this</a>'
+    + '<a href="#shell-overview">Shell chrome</a>'
+    + phaseDef.map(p => `<a href="#phase-${p.id}">Phase ${p.id}. ${escapeHtml(p.name)}</a>`).join('')
+    + '<a href="#ux-observations">UX observations</a>';
+
+  // Phases
+  phases.innerHTML = phaseDef.map(p => {
+    const screens = (screensByPhase.get(p.id) || []);
+    return `<section class="phase" id="phase-${p.id}">
+      <h2>Phase ${p.id}. ${escapeHtml(p.name)}</h2>
+      <p class="phase-meta">${screens.length} screen${screens.length === 1 ? '' : 's'} captured</p>
+      <div class="grid">
+        ${screens.map(renderCard).join('')}
+      </div>
+    </section>`;
+  }).join('');
+
+  uxList.innerHTML = (data.ux_observations || []).map(o => `<li>${escapeHtml(o)}</li>`).join('');
+
+  document.getElementById('json-dump').textContent = JSON.stringify(data, null, 2);
+
+  // Lightbox
+  document.querySelectorAll('.thumb').forEach(t => {
+    t.addEventListener('click', () => openLightbox(t.dataset.src, t.dataset.cap));
+  });
+  document.getElementById('lightbox').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // TOC scroll-spy
+  const links = nav.querySelectorAll('a');
+  const sections = Array.from(document.querySelectorAll('section[id], div#phases > section[id]'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -65% 0px' });
+  sections.forEach(s => observer.observe(s));
+}
+
+function renderCard(s) {
+  const actions = (s.actions || []).map(a =>
+    `<li><strong>${escapeHtml(a.label)}</strong> → <code>${escapeHtml(a.to)}</code></li>`
+  ).join('');
+  const warnings = (s.warnings || []).length
+    ? `<div class="warnings"><strong>Friction noted</strong>${s.warnings.map(w => `<div>${escapeHtml(w)}</div>`).join('')}</div>`
+    : '';
+  const authClass = s.auth === 'public' ? 'auth-public' : 'auth-authed';
+  const src = `./screenshots/${escapeAttr(s.screenshot)}`;
+  return `<article class="card">
+    <a class="thumb" data-src="${src}" data-cap="${escapeAttr(s.title + ' — ' + s.url)}">
+      <img loading="lazy" src="${src}" alt="${escapeAttr(s.title)}">
+    </a>
+    <div class="body">
+      <div class="title"><strong>${escapeHtml(s.title)}</strong><span class="url">${escapeHtml(s.url)}</span><span class="auth ${authClass}">${escapeHtml(s.auth)}</span></div>
+      <div class="desc">${escapeHtml(s.description || '')}</div>
+      ${warnings}
+      ${actions ? `<details><summary>Actions on this screen (${(s.actions||[]).length})</summary><ul>${actions}</ul></details>` : ''}
+    </div>
+  </article>`;
+}
+
+function openLightbox(src, cap) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  const c = document.getElementById('lightbox-cap');
+  img.src = src;
+  c.textContent = cap;
+  lb.classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s) { return escapeHtml(s); }
+</script>
+</body>
+</html>
