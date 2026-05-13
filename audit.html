@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Called — UX & A11Y Audit</title>
+<style>
+  :root {
+    --bg: #f6f5fb;
+    --surface: #ffffff;
+    --ink: #1d1b20;
+    --ink-2: #4b4757;
+    --muted: #7a7585;
+    --brand: #5c2eef;
+    --brand-2: #f1ecff;
+    --border: #e5e0ee;
+    --shadow: 0 1px 2px rgba(20,15,40,.04), 0 6px 24px rgba(20,15,40,.06);
+    --p0: #c0392b;
+    --p1: #d97706;
+    --p2: #2563eb;
+    --p3: #6b7280;
+    --cat-nav: #7c3aed;
+    --cat-a11y: #db2777;
+    --cat-miss: #16a34a;
+    --cat-ux: #0891b2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; }
+
+  header.top {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  header.top h1 { margin: 0; font-size: 26px; letter-spacing: -0.4px; }
+  header.top .sub { color: var(--muted); margin: 4px 0 18px; font-size: 14px; }
+  header.top .stats { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 14px; }
+  header.top .stats .stat { display: flex; flex-direction: column; }
+  header.top .stats .stat strong { font-size: 22px; line-height: 1; }
+  header.top .stats .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+  .filters { display: flex; gap: 8px; padding: 14px 0; border-top: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .filters .group { display: flex; gap: 4px; }
+  .filters .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; }
+  .filters button {
+    appearance: none; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2);
+    padding: 5px 11px; border-radius: 999px; font-size: 12px; cursor: pointer;
+  }
+  .filters button:hover { background: var(--bg); }
+  .filters button.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .filters .nav-links { margin-left: auto; font-size: 13px; display: flex; gap: 14px; }
+
+  main { max-width: 980px; margin: 24px auto 80px; padding: 0 24px; }
+
+  .issue {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .issue summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .issue summary::-webkit-details-marker { display: none; }
+  .issue summary::after {
+    content: "▸";
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform .15s;
+  }
+  .issue[open] summary::after { transform: rotate(90deg); }
+  .issue summary:hover { background: var(--bg); }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: white;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .badge-P0 { background: var(--p0); }
+  .badge-P1 { background: var(--p1); }
+  .badge-P2 { background: var(--p2); }
+  .badge-P3 { background: var(--p3); }
+
+  .id-pill {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 600;
+  }
+  .id-NAV { background: var(--cat-nav); }
+  .id-A11Y { background: var(--cat-a11y); }
+  .id-MISS { background: var(--cat-miss); }
+  .id-UX { background: var(--cat-ux); }
+
+  .effort {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--bg);
+    color: var(--ink-2);
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: ui-monospace, monospace;
+  }
+
+  .issue .title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .issue .body {
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .issue .body section { margin-top: 16px; }
+  .issue .body section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0 0 8px; }
+  .issue .body p { margin: 0 0 8px; color: var(--ink-2); font-size: 14px; }
+  .issue .body code.file { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--ink); word-break: break-all; }
+  .issue .body ul { margin: 0 0 8px; padding-left: 20px; font-size: 14px; color: var(--ink-2); }
+  .issue .body ul li { margin: 3px 0; }
+
+  .prompt-block {
+    position: relative;
+    background: #1d1b20;
+    color: #e9e6f3;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-top: 8px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-height: 480px;
+    overflow-y: auto;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    appearance: none;
+    border: 1px solid #4a4757;
+    background: rgba(255,255,255,.05);
+    color: #e9e6f3;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,.12); }
+  .copy-btn.ok { background: #16a34a; border-color: #16a34a; color: white; }
+
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; }
+
+  @media (max-width: 720px) {
+    header.top { padding: 20px 20px 0; }
+    .filters { gap: 6px; }
+    .filters .label { display: none; }
+    main { padding: 0 14px; }
+    .issue summary { grid-template-columns: auto 1fr auto; gap: 10px; padding: 14px; }
+    .issue summary .effort { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Called — UX &amp; A11Y Audit</h1>
+  <div class="sub">21 issues found across navigation, accessibility, missing features, and UX. Click an issue to expand the fix and copy a developer or Notion-ticket prompt.</div>
+  <div class="stats" id="stats"></div>
+  <div class="filters">
+    <span class="label">Severity</span>
+    <div class="group" id="filter-severity"></div>
+    <span class="label" style="margin-left:12px">Category</span>
+    <div class="group" id="filter-category"></div>
+    <div class="nav-links">
+      <a href="./index.html">← Screen report</a>
+      <a href="./tree.html">Flow tree</a>
+      <a href="./flow.json">flow.json</a>
+      <a href="./issues.json">issues.json</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="issues"></div>
+  <div class="empty-state" id="empty" hidden>No issues match these filters.</div>
+</main>
+
+<script src="./issues-inline.js"></script>
+<script>
+(async function () {
+  let data;
+  try {
+    const res = await fetch('./issues.json');
+    if (res.ok) data = await res.json();
+  } catch (e) {}
+  if (!data) data = window.__ISSUES_DATA__;
+  if (!data) { document.getElementById('empty').hidden = false; document.getElementById('empty').textContent = 'Issues data not loaded yet.'; return; }
+  render(data);
+})();
+
+const state = { severity: null, category: null };
+
+function render(data) {
+  // Stats
+  const sevCounts = {};
+  const catCounts = {};
+  data.issues.forEach(i => {
+    sevCounts[i.severity] = (sevCounts[i.severity] || 0) + 1;
+    const cat = i.id.split('-')[0];
+    catCounts[cat] = (catCounts[cat] || 0) + 1;
+  });
+  const totalEffort = data.issues.reduce((acc, i) => {
+    return acc + ({ XS: 0.25, S: 0.5, M: 1.5, L: 3 }[i.effort] || 0);
+  }, 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><strong>${data.issues.length}</strong><span>Total</span></div>
+    <div class="stat"><strong style="color:var(--p1)">${sevCounts.P1 || 0}</strong><span>P1 high-friction</span></div>
+    <div class="stat"><strong style="color:var(--p2)">${sevCounts.P2 || 0}</strong><span>P2 polish</span></div>
+    <div class="stat"><strong>${totalEffort.toFixed(1)} d</strong><span>Total effort (sum)</span></div>
+  `;
+
+  // Filter buttons
+  const sevs = ['P0','P1','P2','P3'].filter(s => sevCounts[s]);
+  const cats = ['NAV','A11Y','MISS','UX'].filter(c => catCounts[c]);
+  document.getElementById('filter-severity').innerHTML =
+    `<button data-sev="" class="active">All</button>` +
+    sevs.map(s => `<button data-sev="${s}">${s} (${sevCounts[s]})</button>`).join('');
+  document.getElementById('filter-category').innerHTML =
+    `<button data-cat="" class="active">All</button>` +
+    cats.map(c => `<button data-cat="${c}">${c} (${catCounts[c]})</button>`).join('');
+
+  document.querySelectorAll('[data-sev]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-sev]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.severity = b.dataset.sev || null;
+    applyFilters();
+  }));
+  document.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-cat]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.category = b.dataset.cat || null;
+    applyFilters();
+  }));
+
+  // Sort: P0 → P1 → P2 → P3; within severity, by ID
+  data.issues.sort((a,b) => {
+    const order = { P0: 0, P1: 1, P2: 2, P3: 3 };
+    return (order[a.severity] - order[b.severity]) || a.id.localeCompare(b.id);
+  });
+
+  const container = document.getElementById('issues');
+  container.innerHTML = data.issues.map(renderIssue).join('');
+
+  // Wire up copy buttons
+  document.querySelectorAll('.copy-btn').forEach(b => {
+    b.addEventListener('click', async () => {
+      const txt = b.parentElement.querySelector('.prompt-content').textContent;
+      try {
+        await navigator.clipboard.writeText(txt);
+        const orig = b.textContent;
+        b.textContent = '✓ Copied';
+        b.classList.add('ok');
+        setTimeout(() => { b.textContent = orig; b.classList.remove('ok'); }, 1500);
+      } catch (e) {
+        b.textContent = 'Copy failed';
+      }
+    });
+  });
+}
+
+function renderIssue(i) {
+  const cat = i.id.split('-')[0];
+  return `<details class="issue" data-sev="${i.severity}" data-cat="${cat}">
+    <summary>
+      <span class="id-pill id-${cat}">${escapeHtml(i.id)}</span>
+      <span class="title">${escapeHtml(i.title || '')}</span>
+      <span class="badge badge-${i.severity}">${escapeHtml(i.severity)}</span>
+      <span class="effort">${escapeHtml(i.effort || '')}</span>
+    </summary>
+    <div class="body">
+      ${i.description ? `<section><h3>Symptom</h3><p>${escapeHtml(i.description)}</p></section>` : ''}
+      ${i.files && i.files.length ? `<section><h3>Code</h3>${i.files.map(f => `<div><code class="file">${escapeHtml(f)}</code></div>`).join('')}</section>` : ''}
+      ${i.fix ? `<section><h3>Fix sketch</h3><p>${escapeHtml(i.fix)}</p></section>` : ''}
+      <section>
+        <h3>Developer prompt</h3>
+        <div class="prompt-block">
+          <button class="copy-btn">Copy</button>
+          <div class="prompt-content">${escapeHtml(i.dev_prompt || '(coming)')}</div>
+        </div>
+      </section>
+      <section>
+        <h3>Notion ticket prompt</h3>
+        <div class="prompt-block">
+          <button class="copy-btn">Copy</button>
+          <div class="prompt-content">${escapeHtml(i.notion_ticket_prompt || '(coming)')}</div>
+        </div>
+      </section>
+    </div>
+  </details>`;
+}
+
+function applyFilters() {
+  let shown = 0;
+  document.querySelectorAll('.issue').forEach(el => {
+    const sevOk = !state.severity || el.dataset.sev === state.severity;
+    const catOk = !state.category || el.dataset.cat === state.category;
+    const show = sevOk && catOk;
+    el.style.display = show ? '' : 'none';
+    if (show) shown++;
+  });
+  document.getElementById('empty').hidden = shown > 0;
+}
+
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

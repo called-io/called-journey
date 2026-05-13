@@ -10,8 +10,10 @@ A click-by-click map of the Called web app, captured by walking the product as a
 |---|---|
 | [`index.html`](./index.html) | Screen-by-screen report — 53 cards across 7 phases. Click any screenshot to view full-size, expand "Actions" on each card to see what every button does. |
 | [`tree.html`](./tree.html) | Interactive node-link graph of the whole flow. Switch between tree / levels / force layouts, toggle phases on and off, click a node for its screenshot. |
+| [`audit.html`](./audit.html) | UX & A11Y audit — 21 issues with severity, effort estimate, code locations, and a **copy-pasteable developer prompt + Notion-ticket prompt** for each. |
 | [`flow.json`](./flow.json) | Machine-readable sidecar — every screen, every action, every transition target, plus a `ux_observations` array of friction points worth fixing. Feed it to an LLM to surface UX issues. |
-| `screenshots/` | 53 captured PNGs at 1440×900, plus a handful of meta-previews of the report itself. |
+| [`issues.json`](./issues.json) | Audit issues in machine-readable form — same data as `audit.html`. |
+| `screenshots/` | Captured PNGs at 1440×900, plus mobile + dark-theme variants and meta-previews of the report itself. |
 
 ## Coverage (7 phases, 53 screens)
 
